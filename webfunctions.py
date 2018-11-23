@@ -152,7 +152,7 @@ def get_genre_points(genres):
 
 
 def read_table(genre):
-    file = open("../ranked_genres_table.csv", "r")
+    file = open("./Desktop_App/ranked_genres_table.csv", "r")
     reader = csv.reader(file)
     for line in reader:
             if (genre == line[1]):

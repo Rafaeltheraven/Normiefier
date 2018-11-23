@@ -1,14 +1,15 @@
-from bottle import route, run, request, static_file, get, post, request
+from bottle import route, run, request, static_file, get, post, request, default_app, install
 import spotipy
 from spotipy import oauth2
 import webfunctions
 import sys
 import json
+import api
 
-PORT_NUMBER = 8080
-SPOTIPY_CLIENT_ID = 'id'
-SPOTIPY_CLIENT_SECRET = "secret"
-SPOTIPY_REDIRECT_URI = 'http://localhost:8080'
+PORT_NUMBER = 8889
+SPOTIPY_CLIENT_ID = api.get_public_key()
+SPOTIPY_CLIENT_SECRET = api.get_private_key()
+SPOTIPY_REDIRECT_URI = 'https://rafael.thebias.nl/normiefier'
 SCOPE = 'user-library-read playlist-read-private playlist-read-collaborative playlist-modify-private'
 CACHE = '.spotipyoauthcache'
 
@@ -17,7 +18,7 @@ sp_oauth = oauth2.SpotifyOAuth(SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET,SPOTIPY_
 @route('/', method="POST")
 @route('/', method="GET")
 def index():
-
+	print("Got request to /")
 	top = request.forms.get('top')
 	age = request.forms.get('age')
 	token = request.forms.get('token')
@@ -90,7 +91,7 @@ def index():
 		result = result + '''
 				<br><br>
 				<p>Welcome to the Normiefier ''' + username + '''! Please provide the average age of the party you are at and how many tracks you want </p>
-				<form action="/" method="post">
+				<form action="/normiefier" method="post">
 					Top: <input name="top" type="number" min="1" max="1000" required />
 					Age: <input name="age" type="number" required>
 					<input name="token" type="hidden" value=''' + access_token + ''' />
@@ -151,7 +152,7 @@ def stylesheet():
 	return static_file("style.css", "./")
 
 def getBaseHtml():
-	return "<html><head><title>Normiefier</title><link rel='stylesheet' href='/style.css'></head><body><h1>Welcome to the Normiefier!</h1><p>Are you at a party but you don't know what to play when they pass you the AUX cord? No worries, just login with your spotify account below and our 'sophisticated' algortihm will give you a list of the best songs to play, to the worst. Don't have Spotify? Don't worry, just download our desktop program and allow it to search through your entire music library. WARNING: This might take a very long time and expects you to have properly tagged your music files.</p>"
+	return "<html><head><title>Normiefier</title><link rel='stylesheet' href='style.css'></head><body><h1>Welcome to the Normiefier!</h1><p>Are you at a party but you don't know what to play when they pass you the AUX cord? No worries, just login with your spotify account below and our 'sophisticated' algortihm will give you a list of the best songs to play, to the worst. Don't have Spotify? Don't worry, just download our desktop program and allow it to search through your entire music library. WARNING: This might take a very long time and expects you to have properly tagged your music files.</p>"
 
 def htmlForLoginButton():
 	auth_url = getSPOauthURI()
@@ -164,4 +165,7 @@ def getSPOauthURI():
 	auth_url = sp_oauth.get_authorize_url()
 	return auth_url
 
-run(host='', port=8080)
+if __name__ == '__main__':
+	run(server='flup', host='localhost', port=PORT_NUMBER)
+else:
+	app = application = default_app()
